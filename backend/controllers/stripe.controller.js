@@ -95,6 +95,7 @@ const handleVerifyPayment = asyncHandler(async(req, res) => {
 					nextBillingDate: calculateNextBillingDate(),
 					apiRequestCount: 0,
 					monthlyRequestCount: 50,
+					subscriptionPlan: 'Basic',
 					$addToSet: {payments: newPayment?._id}
 				});
 				res.json({
@@ -110,6 +111,7 @@ const handleVerifyPayment = asyncHandler(async(req, res) => {
 					nextBillingDate: calculateNextBillingDate(),
 					apiRequestCount: 0,
 					monthlyRequestCount: 100,
+					subscriptionPlan: 'Premium',
 					$addToSet: {payments: newPayment?._id}
 				});
 				res.json({

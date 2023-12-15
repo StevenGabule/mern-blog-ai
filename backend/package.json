@@ -19,6 +19,7 @@
     "express-async-handler": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.3",
+    "node-cron": "^3.0.3",
     "openai": "^4.21.0",
     "stripe": "^14.9.0"
   },

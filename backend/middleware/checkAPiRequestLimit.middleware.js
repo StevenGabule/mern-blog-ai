@@ -8,7 +8,7 @@ const checkAPiRequestLimit = asyncHandler(async(req, res, next) => {
 	if(!user) return res.status(401).json({ message: 'Account user not found.'});
 
 	let requestLimit = 0;
-	if(user?.isTrialActive) {
+	if(user?.trialActive) {
 		requestLimit = user?.monthlyRequestCount;
 	}
 

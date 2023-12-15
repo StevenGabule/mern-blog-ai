@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
 	email: { type: String, required: true},
 	password: { type: String, required: true},
 	trialPeriod: { type: Number, default: 3},
-	trialActive: { type: Boolean, required: true},
+	trialActive: { type: Boolean, default: true},
 	trialExpires: { type: Date},
 	subscriptionPlan: { type: String, enum: ['Trial', 'Free', 'Basic', 'Premium']},
 	apiRequestCount: {type: Number, default: 0},
@@ -18,10 +18,6 @@ const userSchema = new mongoose.Schema({
 	toJSON: {virtuals: true},
 	toObject: {virtuals: true}
 })
-
-userSchema.virtual('isTrialActive').get(function() {
-	return this.trialActve && new Date() < this.trialExpires;
-});
 
 const User = mongoose.model('User', userSchema)
 

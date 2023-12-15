@@ -78,7 +78,7 @@ const logout = asyncHandler(async(req, res) => {
 })
 
 const userProfile = asyncHandler(async(req, res) => {
-	const user = await User.findById(req.user.id).select('-password');
+	const user = await User.findById(req.user.id).select('-password').populate('payment').populate('history');
 	if(!user) {
 		res.status(401);
 		throw new Error('Account not found.')
@@ -90,9 +90,19 @@ const userProfile = asyncHandler(async(req, res) => {
 	});
 })
 
+const checkAuth = asyncHandler(async(req, res) => {
+	const decoded = jwt.verify(req.cookies.token, process.env.JWT_SECRET);
+	if(decoded) {
+		res.json({ isAuthenticated: true})
+	} else {
+		res.json({ isAuthenticated: false})
+	}
+})
+
 module.exports = {
 	register,
 	login,
 	logout,
-	userProfile
+	userProfile,
+	checkAuth
 }
