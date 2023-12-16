@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cron = require('node-cron');
+const cors = require('cors');
 const usersRouter = require('./routes/users.routes');
 const openAIRouter = require('./routes/openai.routes');
 const { errorHandler } = require('./middleware/error.middleware');
@@ -29,53 +30,56 @@ cron.schedule('0 0 * * * *', async() => {
 	} catch (error) {
 		consoe.log(error)
 	}
-	// cron for the free plan: run at the end of the every month
-	cron.schedule('0 0 1 * * *', async() => {
-		try {
-			const today = new Date();
-			await User.updateMany({
-				subscriptionPlan: 'Free',
-				nextBillingDate: {$lt: today}
-			}, {
-				monthlyRequestCount: 0
-			})
-		} catch (error) {
-			consoe.log(error)
-		}
-	})
+});
+// cron for the free plan: run at the end of the every month
+cron.schedule('0 0 1 * * *', async() => {
+	try {
+		const today = new Date();
+		await User.updateMany({
+			subscriptionPlan: 'Free',
+			nextBillingDate: {$lt: today}
+		}, {
+			monthlyRequestCount: 0
+		})
+	} catch (error) {
+		consoe.log(error)
+	}
+})
 	
-	// cron for the basic plan: run at the end of the every month
-	cron.schedule('0 0 1 * * *', async() => {
-		try {
-			const today = new Date();
-			await User.updateMany({
-				subscriptionPlan: 'Basic',
-				nextBillingDate: {$lt: today}
-			}, {
-				monthlyRequestCount: 0
-			})
-		} catch (error) {
-			consoe.log(error)
-		}
-	})
-	// cron for the premium plan: run at the end of the every month
-	cron.schedule('0 0 1 * * *', async() => {
-		try {
-			const today = new Date();
-			await User.updateMany({
-				subscriptionPlan: 'Premium',
-				nextBillingDate: {$lt: today}
-			}, {
-				monthlyRequestCount: 0
-			})
-		} catch (error) {
-			consoe.log(error)
-		}
-	})
+// cron for the basic plan: run at the end of the every month
+cron.schedule('0 0 1 * * *', async() => {
+	try {
+		const today = new Date();
+		await User.updateMany({
+			subscriptionPlan: 'Basic',
+			nextBillingDate: {$lt: today}
+		}, {
+			monthlyRequestCount: 0
+		})
+	} catch (error) {
+		consoe.log(error)
+	}
+})
+// cron for the premium plan: run at the end of the every month
+cron.schedule('0 0 1 * * *', async() => {
+	try {
+		const today = new Date();
+		await User.updateMany({
+			subscriptionPlan: 'Premium',
+			nextBillingDate: {$lt: today}
+		}, {
+			monthlyRequestCount: 0
+		})
+	} catch (error) {
+		consoe.log(error)
+	}
+})
 
+const corsOptions = { origin: 'http://localhost:3000', credentials: true};
 
-app.use(express.json())
-app.use(cookieParser)
+app.use(express.json());
+app.use(cookieParser);
+app.use(cors(corsOptions));
 
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/openai', openAIRouter);

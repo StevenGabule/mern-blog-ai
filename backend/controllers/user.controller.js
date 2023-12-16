@@ -78,7 +78,7 @@ const logout = asyncHandler(async(req, res) => {
 })
 
 const userProfile = asyncHandler(async(req, res) => {
-	const user = await User.findById(req.user.id).select('-password').populate('payment').populate('history');
+	const user = await User.findById(req.user.id).select('-password').populate('payment').populate('contentHistory');
 	if(!user) {
 		res.status(401);
 		throw new Error('Account not found.')

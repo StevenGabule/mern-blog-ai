@@ -5,12 +5,12 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 const Payment = require('../models/Payment.model');
 const User = require('../models/User.model');
 
-const handleStripePayment = asyncHandler(async(req, res) => {
-	const {amount, subscriptionPlan} = req.body
+const handleStripePayment = asyncHandler(async (req, res) => {
+	const { amount, subscriptionPlan } = req.body
 	const user = req.user;
 	try {
-		const paymentIntent = await stripe.paymentIntents.create({ 
-			amount: Number(amount) * 100, 
+		const paymentIntent = await stripe.paymentIntents.create({
+			amount: Number(amount) * 100,
 			currency: 'usd',
 			metadata: {
 				userId: user?._id?.toString(),
@@ -27,14 +27,14 @@ const handleStripePayment = asyncHandler(async(req, res) => {
 
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({error})
+		res.status(500).json({ error })
 	}
 })
 
-const handleFreeSubscription = asyncHandler(async(req, res) => {
+const handleFreeSubscription = asyncHandler(async (req, res) => {
 	const user = req?.user;
 	try {
-		if(shouldRenewSubscriptionPlan(user)) {
+		if (shouldRenewSubscriptionPlan(user)) {
 			user.subscriptionPlan = "Free"
 			user.monthlyRequestCount = 5;
 			user.apiRequestCount = 0;
@@ -59,36 +59,36 @@ const handleFreeSubscription = asyncHandler(async(req, res) => {
 				user,
 			})
 		} else {
-			return res.status(403).json({error: 'Subscription renewal not due yet.'})
+			return res.status(403).json({ error: 'Subscription renewal not due yet.' })
 		}
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({error})
+		res.status(500).json({ error })
 	}
 })
 
-const handleVerifyPayment = asyncHandler(async(req, res) => {
-	const {paymentId} = req.params;
+const handleVerifyPayment = asyncHandler(async (req, res) => {
+	const { paymentId } = req.params;
 	try {
 		const paymentIntent = await stripe.paymentIntents.retrieve(paymentId)
 		if (paymentIntent.status === 'succeeded') {
 			const metadata = paymentIntent?.metadata;
-			const subcriptionPlan = metadata?.subscriptionPlan;
+			const subscriptionPlan = metadata?.subscriptionPlan;
 			const userEmail = metadata?.userEmail;
 			const userId = metadata?.userId;
 
 			// find the user
 			const userFound = await User.findById(userId);
-			if(!userFound) return res.status(401).json({status:false, message: 'User not found.'})
+			if (!userFound) return res.status(401).json({ status: false, message: 'User not found.' })
 
 			// get the payment history
 			const amount = paymentIntent?.amount / 100;
-			const current = paymentIntent?.currency;
+			const currency = paymentIntent?.currency;
 			const paymentId = paymentIntent?.id
 
 			// create the payment history
 			const newPayment = await Payment.create({ user: userId, email: userEmail, subscriptionPlan, amount, currency, status: 'success', reference: paymentId })
-			if(subscriptionPlan === 'Basic') {
+			if (subscriptionPlan === 'Basic') {
 				const updatedUser = await User.findByIdAndUpdate(userId, {
 					subscriptionPlan,
 					trialPeriod: 0,
@@ -96,7 +96,7 @@ const handleVerifyPayment = asyncHandler(async(req, res) => {
 					apiRequestCount: 0,
 					monthlyRequestCount: 50,
 					subscriptionPlan: 'Basic',
-					$addToSet: {payments: newPayment?._id}
+					$addToSet: { payments: newPayment?._id }
 				});
 				res.json({
 					status: true,
@@ -104,7 +104,7 @@ const handleVerifyPayment = asyncHandler(async(req, res) => {
 					updatedUser
 				})
 			}
-			if(subscriptionPlan === 'Premium') {
+			if (subscriptionPlan === 'Premium') {
 				const updatedUser = await User.findByIdAndUpdate(userId, {
 					subscriptionPlan,
 					trialPeriod: 0,
@@ -112,7 +112,7 @@ const handleVerifyPayment = asyncHandler(async(req, res) => {
 					apiRequestCount: 0,
 					monthlyRequestCount: 100,
 					subscriptionPlan: 'Premium',
-					$addToSet: {payments: newPayment?._id}
+					$addToSet: { payments: newPayment?._id }
 				});
 				res.json({
 					status: true,
@@ -123,8 +123,8 @@ const handleVerifyPayment = asyncHandler(async(req, res) => {
 		}
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({error})
+		res.status(500).json({ error })
 	}
 })
 
-module.exports = {handleStripePayment, handleFreeSubscription, handleVerifyPayment};
+module.exports = { handleStripePayment, handleFreeSubscription, handleVerifyPayment };

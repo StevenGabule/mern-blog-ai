@@ -20,7 +20,7 @@ const openAIController = asyncHandler(async(req, res) => {
 		const newContent = await ContentHistory.create({user: req.user._id, content})
 
 		const userFound = await User.findById(req.user.id);
-		userFound.history.push(newContent?._id)
+		userFound.contentHistory.push(newContent?._id)
 		userFound.apiRequestCount += 1;
 		await userFound.save();
 		
